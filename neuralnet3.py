@@ -12,7 +12,6 @@ class Net:
         except TypeError:
             return 1/(1+numpy.exp(-max(min(x,10),-10)))
     def __init__(self,nnodes=None,data=None):
-        numpy.random.seed(24)
         if data:
             self.nnodes=data["l"]
             self.nlayers=len(self.nnodes)
@@ -28,41 +27,28 @@ class Net:
             result=self.W[i].dot(result)
             result=self.activate(result)
         return self.W[-1].dot(result)
-    """def net(self,x):
-        result=[[x],[x]]
-        for i in range(self.nlayers-1):
-            n=self.W[i].dot(result[1][-1])
-            result[0].append(n)
-            result[1].append(n)
-            result[1][-1]=self.activate(result[1][-1])
-        return result"""
     def net(self,x):
         result=[x]
         for i in range(self.nlayers-2):
             n=self.W[i].dot(result[-1])
             result.append(n)
-            result[-1]=self.activate(result[-1])
-        result.append(self.W[-1].dot(result[-1]))
-        return numpy.array(result)
+            result[-1]=list(self.activate(result[-1]))
+        result.append(list(self.W[-1].dot(result[-1])))
+        return numpy.array([numpy.array(i) for i in result])
     def delta(self,layer,t,o_):
         q=o_[layer]
         if layer==self.nlayers-1:
             return [(q-t)]
         else:
             d=self.delta(layer+1,t,o_)
-            print self.W[layer].T.shape
-            print d[-1].shape
-            print q
-            print "-"
-            return [self.W[layer].T.dot(d[-1])*q*(1-q)]+d
+            r=self.W[layer].T.dot(d[0])
+            return [r*q*(1-q)]+d
     def backpropagate(self,x,t,rate=1.):
         o=self.net(x)
-        #print numpy.outer(self.delta(0,t,o),o)
         delta_=self.delta(0,t,o)
         d=numpy.array([numpy.outer(delta_[layer],o[layer-1])*-rate for layer in range(1,self.nlayers)])
         for i in range(self.nlayers-1):
             self.W[i]+=d[i]
-            print i
     def partial(self,x,t,layer,i,j):
         e1=self.error(x,t)
         self.W[layer][i,j]+=0.004

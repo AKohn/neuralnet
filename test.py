@@ -31,15 +31,15 @@ while True:
             x,y=unconv(*event.pos)
             n.backpropogate([x],[math.sin(x),math.cos(x)])
             graph()"""
-    for i in range(1):
-        #print i
+    for i in range(1000000):
+        print i
         numpy.random.shuffle(x)
         for j in x:
             #print "partial"
             #print n.partial([j],[numpy.sin(j)],0,0,0),n.partial([j],[numpy.sin(j)],1,0,0)
-            n.backpropagate([j],[numpy.sin(j)],rate=.05)
+            n.backpropagate([j],[numpy.sin(j)],rate=.01)
             #print n.partial(x,[n.run(k) for k in x],0,0,0)
-    graph()
+        graph()
 """err=[]
 for i in range(10):
     print i
